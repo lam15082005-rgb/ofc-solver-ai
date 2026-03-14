@@ -1,0 +1,16 @@
+{
+  "admin": {
+    "username": "admin",
+    "password_hash": "022bda43ac58e38b67d161bd4484618db79970d52bfdb82847f0ad275dd3bf5e",
+    "created_at": "2026-01-28T13:55:33.652878",
+    "is_active": true,
+    "display_name": "Admin"
+  },
+  "EltonAce": {
+    "username": "EltonAce",
+    "password_hash": "d6b1cf6f531ff77a894c7f91ce459f7653d97195bd782fb63362f41a33f7b65d",
+    "created_at": "2026-01-28T14:02:19.696077",
+    "is_active": true,
+    "display_name": "ET"
+  }
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OFC Solver AI</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page" class="page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo">🎴</div>
+                    <h1>OFC Solver AI</h1>
+                    <p>GTO Analysis for Open-Face Chinese Poker</p>
+                </div>
+                
+                <form id="login-form" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required autocomplete="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                    </div>
+                    
+                    <div id="login-error" class="error-message"></div>
+                    
+                    <button type="submit" class="btn btn-primary" id="login-btn">
+                        <span class="btn-text">Sign In</span>
+                        <span class="btn-loader"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Page -->
+    <div id="chat-page" class="page hidden">
+        <header class="app-header">
+            <div class="header-left">
+                <span class="logo-small">🎴</span>
+                <h1>OFC Solver AI</h1>
+            </div>
+            <div class="header-right">
+                <span id="user-display" class="user-name"></span>
+                <button id="logout-btn" class="btn btn-ghost">Logout</button>
+            </div>
+        </header>
+
+        <main class="chat-container">
+            <div id="chat-messages" class="chat-messages">
+                <div class="welcome-message">
+                    <div class="welcome-icon">🎴</div>
+                    <h2>Welcome to OFC Solver AI</h2>
+                    <p>Ask me anything about Open-Face Chinese Poker strategy.</p>
+                    <div class="example-queries">
+                        <p>Try asking:</p>
+                        <button class="example-btn" data-query="Show me a solution with pair of aces on top">Pair of aces on top</button>
+                        <button class="example-btn" data-query="What's the average EV for hands with a flush on bottom?">Flush on bottom EV</button>
+                        <button class="example-btn" data-query="I have AhAdKs, what should I do?">Analyze my hand</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <form id="chat-form" class="chat-form">
+                    <textarea 
+                        id="chat-input" 
+                        placeholder="Ask about GTO strategy, analyze hands, or query the database..."
+                        rows="1"
+                    ></textarea>
+                    <button type="button" class="btn btn-solver" id="solver-btn" title="Open Solver">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                    </button>
+                    <button type="submit" class="btn btn-send" id="send-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Card Selector Modal -->
+    <div id="card-selector-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Select 13 Cards</h2>
+                <button class="modal-close" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="selected-cards">
+                    <div class="selected-count">Selected: <span id="selected-count">0</span>/13</div>
+                    <div id="selected-cards-display" class="selected-cards-list"></div>
+                </div>
+                <div class="card-grid" id="card-grid">
+                    <!-- Cards will be generated here by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="clear-selection">Clear</button>
+                <button class="btn btn-primary" id="solve-btn" disabled>Solve</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Build artifacts
+*.so
+*.dylib
+*.o
+*.pyc
+__pycache__/
+
+# Except the pre-built macOS version (if any)
+!framework.cpython-*.so

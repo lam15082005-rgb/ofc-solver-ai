@@ -15,10 +15,20 @@ class Database:
             'password': os.getenv('MYSQL_PASSWORD'),
             'database': os.getenv('MYSQL_DATABASE', 'cfr'),
         }
+        self._available = bool(self.config['user'] and self.config['password'])
+        if not self._available:
+            print("⚠️  MySQL credentials not configured. Database features disabled.")
+            print("   Set MYSQL_USER and MYSQL_PASSWORD to enable database queries.")
     
+    @property
+    def available(self) -> bool:
+        return self._available
+
     @contextmanager
     def get_connection(self):
         """Context manager for database connections."""
+        if not self._available:
+            raise Error("Database not configured. Set MYSQL_USER and MYSQL_PASSWORD environment variables.")
         conn = None
         try:
             conn = mysql.connector.connect(**self.config)

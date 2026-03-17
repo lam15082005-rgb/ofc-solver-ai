@@ -34,7 +34,12 @@ from hand_validator import validate_solution_string
 
 class OFCAgent:
     def __init__(self):
-        self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+        api_key = os.getenv('ANTHROPIC_API_KEY')
+        if not api_key:
+            print("\u26a0\ufe0f  ANTHROPIC_API_KEY not set. Chat features will be unavailable.")
+            self.client = None
+        else:
+            self.client = Anthropic(api_key=api_key)
         self.model = "claude-sonnet-4-20250514"
         self.max_tool_calls = 30
         
@@ -318,6 +323,9 @@ class OFCAgent:
     def chat(self, user_message: str, session: Optional[Session] = None, 
              conversation_history: list = None) -> str:
         """Process a user message and return the agent's response."""
+        
+        if not self.client:
+            return "Error: ANTHROPIC_API_KEY is not configured. Please set the environment variable and restart the server."
         
         if session:
             messages = session.get_conversation_history()

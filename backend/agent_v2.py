@@ -36,7 +36,12 @@ class ImprovedOFCAgent:
     """Improved agent with smart tool selection and context injection."""
     
     def __init__(self):
-        self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+        api_key = os.getenv('ANTHROPIC_API_KEY')
+        if not api_key:
+            print("\u26a0\ufe0f  ANTHROPIC_API_KEY not set. Chat features will be unavailable.")
+            self.client = None
+        else:
+            self.client = Anthropic(api_key=api_key)
         self.model = "claude-sonnet-4-20250514"
         self.max_tool_calls = 30
         
@@ -393,6 +398,9 @@ class ImprovedOFCAgent:
     def chat(self, user_message: str, session: Optional[Session] = None, 
              conversation_history: list = None) -> str:
         """Process message with smart tool chaining and dynamic prompts."""
+        
+        if not self.client:
+            return "Error: ANTHROPIC_API_KEY is not configured. Please set the environment variable and restart the server."
         
         # Analyze query to guide tool selection
         query_analysis = self._detect_query_type(user_message)

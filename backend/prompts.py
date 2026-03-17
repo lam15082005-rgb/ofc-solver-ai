@@ -231,8 +231,8 @@ Parameters:
 - hole_cards: The 13 cards to arrange (space-separated, e.g., "Ah Kd Qc Js Th 9h 8c 7d 6s 5h 4c 3d 2s")
 - dead_cards: Dead/unavailable cards (varies by game version, default 4 cards for version 2)
 - game_version: 1-7, default 2 (Joker Royalties 4-player)
-- iterations: CFR iterations, default 10000 (use 1000-5000 for quick answers)
-- traversals: Samples per iteration, default 100
+- iterations: CFR iterations, default 1000 (use 100-500 for quick answers, 1000+ for precise GTO)
+- traversals: Samples per iteration, default 10
 
 Returns the GTO solution, EV, frequency, and top alternatives.""",
             "input_schema": {
@@ -253,13 +253,13 @@ Returns the GTO solution, EV, frequency, and top alternatives.""",
                     },
                     "iterations": {
                         "type": "integer",
-                        "description": "CFR iterations (more = better, slower). Default 10000, use 1000-5000 for quick answers.",
-                        "default": 10000
+                        "description": "CFR iterations (more = better, slower). Default 1000, use 100-500 for quick answers.",
+                        "default": 1000
                     },
                     "traversals": {
                         "type": "integer",
-                        "description": "Traversals per iteration, default 100",
-                        "default": 100
+                        "description": "Traversals per iteration, default 10",
+                        "default": 10
                     }
                 },
                 "required": ["hole_cards", "dead_cards"]

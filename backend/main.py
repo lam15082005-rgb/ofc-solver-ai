@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi import FastAPI, HTTPException, Depends, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -61,13 +61,22 @@ app.add_middleware(
 security = HTTPBearer(auto_error=False)
 
 
-# Auth dependency
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+# Auth dependency - checks both Authorization and X-App-Auth headers
+# X-App-Auth is used when Authorization carries tunnel basic auth
+async def get_current_user(request: Request, credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Verify JWT token and return current user."""
-    if not credentials:
+    token = None
+    
+    # First check X-App-Auth header (used when tunnel basic auth is in Authorization)
+    x_app_auth = request.headers.get("x-app-auth", "")
+    if x_app_auth.startswith("Bearer "):
+        token = x_app_auth[7:]
+    elif credentials:
+        token = credentials.credentials
+    
+    if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    token = credentials.credentials
     username = verify_token(token)
     
     if not username:
@@ -81,12 +90,19 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 
 # Optional auth (for endpoints that work with or without auth)
-async def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+async def get_optional_user(request: Request, credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Get current user if authenticated, None otherwise."""
-    if not credentials:
+    token = None
+    
+    x_app_auth = request.headers.get("x-app-auth", "")
+    if x_app_auth.startswith("Bearer "):
+        token = x_app_auth[7:]
+    elif credentials:
+        token = credentials.credentials
+    
+    if not token:
         return None
     
-    token = credentials.credentials
     username = verify_token(token)
     
     if not username:
@@ -554,12 +570,49 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
 @app.get("/app", response_class=HTMLResponse)
 @app.get("/app/", response_class=HTMLResponse)
+@app.get("/v3", response_class=HTMLResponse)
+@app.get("/v3/", response_class=HTMLResponse)
+@app.get("/v4", response_class=HTMLResponse)
+@app.get("/v4/", response_class=HTMLResponse)
+@app.get("/v5", response_class=HTMLResponse)
+@app.get("/v5/", response_class=HTMLResponse)
 async def serve_app():
-    """Serve the frontend app."""
+    """Serve the frontend app with inlined CSS and JS to avoid caching issues."""
     index_path = FRONTEND_DIR / "index.html"
-    if index_path.exists():
-        return FileResponse(index_path)
-    raise HTTPException(status_code=404, detail="Frontend not found")
+    css_path = FRONTEND_DIR / "styles.css"
+    js_path = FRONTEND_DIR / "app.js"
+    
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail="Frontend not found")
+    
+    html = index_path.read_text()
+    
+    # Inline CSS and JS to avoid browser caching issues with tunnel auth
+    if css_path.exists():
+        css_content = css_path.read_text()
+        html = html.replace(
+            '<link rel="stylesheet" href="/static/styles.css">',
+            f'<style>{css_content}</style>'
+        )
+    
+    if js_path.exists():
+        js_content = js_path.read_text()
+        html = html.replace(
+            '<script src="/static/app.js?v=2"></script>',
+            f'<script>{js_content}</script>'
+        )
+        # Also handle without cache bust param
+        html = html.replace(
+            '<script src="/static/app.js"></script>',
+            f'<script>{js_content}</script>'
+        )
+    
+    from starlette.responses import Response
+    return Response(
+        content=html,
+        media_type="text/html",
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache"}
+    )
 
 # Serve static files (CSS, JS)
 if FRONTEND_DIR.exists():

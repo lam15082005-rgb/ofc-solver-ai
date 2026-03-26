@@ -63,6 +63,24 @@ function setupEventListeners() {
     });
 }
 
+// XHR-based request helper (works with tunnel basic auth where fetch() is blocked)
+function xhrRequest(url, method, headers, body) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method || 'GET', url, true);
+        if (headers) {
+            Object.keys(headers).forEach(k => xhr.setRequestHeader(k, headers[k]));
+        }
+        xhr.onload = function() {
+            let jsonData = null;
+            try { jsonData = JSON.parse(xhr.responseText); } catch(e) { /* not json */ }
+            resolve({ status: xhr.status, ok: xhr.status >= 200 && xhr.status < 300, json: () => Promise.resolve(jsonData), text: () => Promise.resolve(xhr.responseText) });
+        };
+        xhr.onerror = function() { reject(new Error('Network error')); };
+        xhr.send(body || null);
+    });
+}
+
 // API Helpers
 async function apiRequest(endpoint, options = {}) {
     const headers = {
@@ -71,13 +89,10 @@ async function apiRequest(endpoint, options = {}) {
     };
     
     if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
+        headers['X-App-Auth'] = `Bearer ${authToken}`;
     }
     
-    const response = await fetch(`${API_URL}${endpoint}`, {
-        ...options,
-        headers
-    });
+    const response = await xhrRequest(`${API_URL}${endpoint}`, options.method || 'GET', headers, options.body);
     
     if (response.status === 401) {
         handleLogout();
@@ -112,11 +127,7 @@ async function handleLogin(e) {
     loginError.textContent = '';
     
     try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+        const response = await xhrRequest(`${API_URL}/auth/login`, 'POST', { 'Content-Type': 'application/json' }, JSON.stringify({ username, password }));
         
         const data = await response.json();
         
@@ -197,13 +208,14 @@ async function handleSendMessage(e) {
         
         const data = await response.json();
         
-        if (response.ok) {
+        if (response.ok && data) {
             sessionId = data.session_id;
             thinkingEl.remove();
             addMessage('assistant', data.response);
         } else {
             thinkingEl.remove();
-            addMessage('assistant', `Error: ${data.detail || 'Something went wrong'}`);
+            const errMsg = (data && data.detail) ? data.detail : 'Something went wrong — server may be busy, try again';
+            addMessage('assistant', `Error: ${errMsg}`);
         }
     } catch (error) {
         thinkingEl.remove();

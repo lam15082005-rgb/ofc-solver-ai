@@ -222,6 +222,8 @@ def main():
                 except:
                     pass
                 time.sleep(1)
+                total_generated -= batch_count  # Adjust for rolled-back solutions
+                batch_count = 0
                 conn = get_db_connection()
                 cursor = conn.cursor()
                 continue

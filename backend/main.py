@@ -574,6 +574,8 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 @app.get("/v3/", response_class=HTMLResponse)
 @app.get("/v4", response_class=HTMLResponse)
 @app.get("/v4/", response_class=HTMLResponse)
+@app.get("/v5", response_class=HTMLResponse)
+@app.get("/v5/", response_class=HTMLResponse)
 async def serve_app():
     """Serve the frontend app with inlined CSS and JS to avoid caching issues."""
     index_path = FRONTEND_DIR / "index.html"

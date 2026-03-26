@@ -208,13 +208,14 @@ async function handleSendMessage(e) {
         
         const data = await response.json();
         
-        if (response.ok) {
+        if (response.ok && data) {
             sessionId = data.session_id;
             thinkingEl.remove();
             addMessage('assistant', data.response);
         } else {
             thinkingEl.remove();
-            addMessage('assistant', `Error: ${data.detail || 'Something went wrong'}`);
+            const errMsg = (data && data.detail) ? data.detail : 'Something went wrong — server may be busy, try again';
+            addMessage('assistant', `Error: ${errMsg}`);
         }
     } catch (error) {
         thinkingEl.remove();
